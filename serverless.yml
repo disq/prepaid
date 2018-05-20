@@ -34,6 +34,7 @@ functions:
       - http:
           path: /card/new
           method: post
+          cors: true
           resp: http
           request:
             parameters:
@@ -46,6 +47,7 @@ functions:
       - http:
           path: /card/{id}/status
           method: get
+          cors: true
           resp: http
           request:
             parameters:
@@ -58,6 +60,7 @@ functions:
       - http:
           path: /card/{id}/topup
           method: post
+          cors: true
           resp: http
           request:
             parameters:
@@ -72,6 +75,7 @@ functions:
       - http:
           path: /card/{id}/spend
           method: post
+          cors: true
           resp: http
           request:
             parameters:
@@ -87,6 +91,7 @@ functions:
       - http:
           path: /tx/{id}/status
           method: get
+          cors: true
           resp: http
           request:
             parameters:
@@ -99,6 +104,7 @@ functions:
       - http:
           path: /tx/{id}/reverse
           method: post
+          cors: true
           resp: http
           request:
             parameters:
@@ -113,6 +119,7 @@ functions:
       - http:
           path: /tx/{id}/capture
           method: post
+          cors: true
           resp: http
           request:
             parameters:
@@ -127,6 +134,7 @@ functions:
       - http:
           path: /tx/{id}/refund
           method: post
+          cors: true
           resp: http
           request:
             parameters:

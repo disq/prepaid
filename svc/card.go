@@ -18,3 +18,13 @@ func (se *Service) NewCard(initialAmount float64) (*model.CardStatus, error) {
 
 	return &cs, nil
 }
+
+func (se *Service) CardStatus(id string) (*model.CardStatus, error) {
+	var cs model.CardStatus
+
+	if err := se.db.CardsTable().Get("id", id).One(&cs); err != nil {
+		return nil, errors.Wrap(err, "getCard")
+	}
+
+	return &cs, nil
+}

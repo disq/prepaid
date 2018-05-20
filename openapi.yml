@@ -34,6 +34,28 @@ paths:
                   $ref: '#/components/schemas/CardStatus'
         '500':
           description: Invalid input
+  /card/{id}/status:
+    post:
+      tags:
+        - cards
+      summary: Get status of a card
+      operationId: card-status
+      parameters:
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/CardStatus'
+        '500':
+          description: Invalid input
 components:
   schemas:
     CardStatus:
