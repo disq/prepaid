@@ -56,6 +56,35 @@ paths:
                   $ref: '#/components/schemas/CardStatus'
         '500':
           description: Invalid input
+  /card/{id}/topup:
+    post:
+      tags:
+        - cards
+      summary: Top up card
+      operationId: card-topup
+      parameters:
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: string
+        - name: amt
+          in: query
+          description: Amount to top up
+          required: true
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/CardStatus'
+        '500':
+          description: Invalid input
 components:
   schemas:
     CardStatus:

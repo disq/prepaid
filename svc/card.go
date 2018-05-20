@@ -28,3 +28,13 @@ func (se *Service) CardStatus(id string) (*model.CardStatus, error) {
 
 	return &cs, nil
 }
+
+func (se *Service) CardTopup(id string, amt float64) (*model.CardStatus, error) {
+	var cs model.CardStatus
+
+	if err := se.db.CardsTable().Update("id", id).If("attribute_exists(id)").Add("balance", amt).Value(&cs); err != nil {
+		return nil, errors.Wrap(err, "updateCard")
+	}
+
+	return &cs, nil
+}

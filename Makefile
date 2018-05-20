@@ -21,6 +21,7 @@ clean:
 sls-build:
 	env GOOS=linux go build -ldflags="-s -w" -o bin/card-new functions/card-new/*.go
 	env GOOS=linux go build -ldflags="-s -w" -o bin/card-status functions/card-status/*.go
+	env GOOS=linux go build -ldflags="-s -w" -o bin/card-topup functions/card-topup/*.go
 
 sls-deploy:
 	serverless deploy
