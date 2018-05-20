@@ -1,0 +1,59 @@
+openapi: 3.0.1
+servers:
+  - url: 'https:/test/dev'
+info:
+  title: Prepaid
+  description: Prepaid POC
+  version: 1.0.0
+tags:
+  - name: cards
+    description: Cards
+  - name: transactions
+    description: Transactions
+paths:
+  /card/new:
+    post:
+      tags:
+        - cards
+      summary: Create a new card
+      operationId: card-new
+      parameters:
+        - name: amt
+          in: query
+          description: Initial amount
+          required: false
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/CardStatus'
+        '500':
+          description: Invalid input
+components:
+  schemas:
+    CardStatus:
+      type: object
+      properties:
+        id:
+          type: string
+        available-balance:
+          type: number
+          format: float
+        blocked-amount:
+          type: number
+          format: float
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string

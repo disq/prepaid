@@ -1,0 +1,180 @@
+service: prepaid
+
+provider:
+  name: aws
+  runtime: go1.x
+  region: us-east-1
+  environment:
+    CARDS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-cards
+    TX_TABLE: ${self:service}-${opt:stage, self:provider.stage}-tx
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CARDS_TABLE}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.TX_TABLE}"
+
+package:
+ exclude:
+   - ./**
+ include:
+   - ./bin/**
+
+functions:
+  card-new:
+    handler: bin/card-new
+    events:
+      - http:
+          path: /card/new
+          method: post
+          resp: http
+          request:
+            parameters:
+              querystrings:
+                amt: true
+
+  card-status:
+    handler: bin/card-status
+    events:
+      - http:
+          path: /card/{id}/status
+          method: get
+          resp: http
+          request:
+            parameters:
+              paths:
+                id: true
+
+  card-topup:
+    handler: bin/card-topup
+    events:
+      - http:
+          path: /card/{id}/topup
+          method: post
+          resp: http
+          request:
+            parameters:
+              paths:
+                id: true
+              querystrings:
+                amt: true
+
+  card-spend:
+    handler: bin/card-spend
+    events:
+      - http:
+          path: /card/{id}/spend
+          method: post
+          resp: http
+          request:
+            parameters:
+              paths:
+                id: true
+              querystrings:
+                merchant_name: true
+                amt: true
+
+  tx-status:
+    handler: bin/tx-status
+    events:
+      - http:
+          path: /tx/{id}/status
+          method: get
+          resp: http
+          request:
+            parameters:
+              paths:
+                id: true
+
+  tx-reverse:
+    handler: bin/tx-reverse
+    events:
+      - http:
+          path: /tx/{id}/reverse
+          method: post
+          resp: http
+          request:
+            parameters:
+              paths:
+                id: true
+              querystrings:
+                amt: true
+
+  tx-capture:
+    handler: bin/tx-capture
+    events:
+      - http:
+          path: /tx/{id}/capture
+          method: post
+          resp: http
+          request:
+            parameters:
+              paths:
+                id: true
+              querystrings:
+                amt: true
+
+  tx-refund:
+    handler: bin/tx-refund
+    events:
+      - http:
+          path: /tx/{id}/refund
+          method: post
+          resp: http
+          request:
+            parameters:
+              paths:
+                id: true
+              querystrings:
+                amt: true
+
+  tx-cleanup:
+    handler: bin/tx-cleanup
+    events:
+      - schedule:
+          name: tx-cleanup
+          description: Clean up orphaned transactions
+          rate: rate(5 minutes)
+
+resources:
+  Resources:
+    CardsTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.CARDS_TABLE}
+
+    TxTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.TX_TABLE}
