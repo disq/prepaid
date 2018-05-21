@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	// TxExpireDuration is the time uncaptured transactions expire.
-	TxExpireDuration = 12 * time.Hour
+	// TxExpireDuration is the time uncaptured transactions and unrefunded captures expire.
+	TxExpireDuration = 5 * time.Minute
 )
 
 // NewTx creates a new transaction on card cardID, blocking amt funds for merchant.
@@ -112,9 +112,10 @@ func (se *Service) TxRefund(id string, amt float64) (*model.TxStatus, error) {
 		return nil, fmt.Errorf("amt should be positive")
 	}
 
-	t := model.NullTime{Valid: true, Time: time.Now().UTC()}
+	t := time.Now().UTC()
+	nt := model.NullTime{Valid: true, Time: t}
 
-	if err := se.db.TxTable().Update("id", id).If("attribute_exists(id) AND blocked = ? AND captured >= ?", 0, amt).Add("captured", -amt).Add("refunded", amt).Set("refunded_at", t).Value(&ts); err != nil {
+	if err := se.db.TxTable().Update("id", id).If("attribute_exists(id) AND blocked = ? AND captured >= ? AND expires > ?", 0, amt, t.Unix()).Add("captured", -amt).Add("refunded", amt).Set("refunded_at", nt).Value(&ts); err != nil {
 		return nil, errors.Wrap(err, "updateTx")
 	}
 
@@ -125,4 +126,29 @@ func (se *Service) TxRefund(id string, amt float64) (*model.TxStatus, error) {
 	}
 
 	return &ts, nil
+}
+
+// TxCleanup scans expired transactions and refunds blocked amount to prepaid cards.
+func (se *Service) TxCleanup() error {
+
+	var res []model.TxStatus
+
+	if err := se.db.TxTable().Scan().All(&res); err != nil {
+		return err
+	}
+
+	for _, tx := range res {
+		t := time.Now().UTC()
+
+		if tx.Blocked == 0 || !tx.ExpiresAt.Valid || tx.ExpiresAt.Time.After(t) {
+			continue
+		}
+
+		_, err := se.TxReverse(tx.ID, tx.Blocked)
+		if err != nil {
+			se.logger.Printf("Error cleaning up %v: %v", tx.ID, err)
+		}
+	}
+
+	return nil
 }

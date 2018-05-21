@@ -1,7 +1,12 @@
 package model
 
 import (
+	"fmt"
+	"strconv"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
 // NullTime represents an time.Time value that may be null, represented as an empty string in text, and null in JSON.
@@ -25,8 +30,8 @@ func (n *NullTime) UnmarshalText(text []byte) error {
 		return err
 	}
 
-	n.Valid = true
 	n.Time = t
+	n.Valid = true
 	return nil
 }
 
@@ -50,4 +55,32 @@ func (n NullTime) MarshalJSON() ([]byte, error) {
 	}
 
 	return []byte(s), nil
+}
+
+// MarshalDynamoDBAttributeValue implements the dynamodbattribute.Marshaler interface.
+func (n NullTime) MarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) error {
+	if !n.Valid {
+		av.NULL = aws.Bool(true)
+		return nil
+	}
+
+	av.N = aws.String(fmt.Sprintf("%v", n.Time.Unix()))
+	return nil
+}
+
+// UnmarshalDynamoDBAttributeValue implements the dynamodbattribute.Unmarshaler interface.
+func (n *NullTime) UnmarshalDynamoDBAttributeValue(av *dynamodb.AttributeValue) error {
+	n.Valid = false
+	if av == nil || av.N == nil || av.NULL != nil {
+		return nil
+	}
+
+	i, err := strconv.ParseInt(*av.N, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	n.Time = time.Unix(i, 0)
+	n.Valid = true
+	return nil
 }

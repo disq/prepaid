@@ -14,9 +14,14 @@ func (se *Service) ApiGW(data interface{}, err error) (events.APIGatewayProxyRes
 
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
+			Headers:    map[string]string{"Access-Control-Allow-Origin": "*"},
 		}, nil
 	}
 
 	str, err := json.Marshal(data)
-	return events.APIGatewayProxyResponse{Body: string(str) + "\n", StatusCode: http.StatusOK}, err
+	return events.APIGatewayProxyResponse{
+		StatusCode: http.StatusOK,
+		Headers:    map[string]string{"Access-Control-Allow-Origin": "*"},
+		Body:       string(str) + "\n",
+	}, err
 }
