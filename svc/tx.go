@@ -118,7 +118,7 @@ func (se *Service) TxRefund(id string, amt float64) (*model.TxStatus, error) {
 		return nil, errors.Wrap(err, "updateTx")
 	}
 
-	if err := se.db.CardsTable().Update("id", ts.CardID).If("attribute_exists(id) AND blocked >= ?", amt).Add("balance", amt).Run(); err != nil {
+	if err := se.db.CardsTable().Update("id", ts.CardID).If("attribute_exists(id)", amt).Add("balance", amt).Run(); err != nil {
 		// FIXME rollback txTable
 		se.logger.Printf("WARNING(TxRefund) Orphan txTable: id=%v amt=%v", id, amt)
 		return nil, errors.Wrap(err, "updateBalance")
