@@ -121,6 +121,29 @@ paths:
                   $ref: '#/components/schemas/TxStatus'
         '500':
           description: Invalid input
+  /card/{id}/statement:
+    post:
+      tags:
+        - cards
+        - transactions
+      summary: Get statement of a card
+      operationId: card-statement
+      parameters:
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/CardStatement'
+        '500':
+          description: Invalid input
   /tx/{id}/status:
     post:
       tags:
@@ -259,6 +282,15 @@ components:
           format: float
         expires:
           type: string
+    CardStatement:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/CardStatement'
+        tx:
+          type: array
+          items:
+            $ref: '#/components/schemas/TxStatus'
     ApiResponse:
       type: object
       properties:

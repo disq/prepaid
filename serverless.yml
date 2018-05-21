@@ -20,6 +20,7 @@ provider:
       Resource:
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CARDS_TABLE}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.TX_TABLE}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.TX_TABLE}/index/*"
 
 package:
  exclude:
@@ -84,6 +85,19 @@ functions:
               querystrings:
                 merchant: true
                 amt: true
+
+  card-statement:
+    handler: bin/card-statement
+    events:
+      - http:
+          path: /card/{id}/statement
+          method: get
+          cors: true
+          resp: http
+          request:
+            parameters:
+              paths:
+                id: true
 
   tx-status:
     handler: bin/tx-status
@@ -178,6 +192,9 @@ resources:
           -
             AttributeName: id
             AttributeType: S
+          -
+            AttributeName: card_id
+            AttributeType: S
         KeySchema:
           -
             AttributeName: id
@@ -185,4 +202,16 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          -
+            IndexName: card_id-index
+            KeySchema:
+              -
+                AttributeName: card_id
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
         TableName: ${self:provider.environment.TX_TABLE}

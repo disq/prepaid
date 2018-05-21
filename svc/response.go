@@ -18,5 +18,5 @@ func (se *Service) ApiGW(data interface{}, err error) (events.APIGatewayProxyRes
 	}
 
 	str, err := json.Marshal(data)
-	return events.APIGatewayProxyResponse{Body: string(str), StatusCode: http.StatusOK}, err
+	return events.APIGatewayProxyResponse{Body: string(str) + "\n", StatusCode: http.StatusOK}, err
 }

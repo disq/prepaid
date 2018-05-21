@@ -5,6 +5,7 @@ import (
 
 	"github.com/disq/prepaid"
 	"github.com/disq/prepaid/model"
+	"github.com/guregu/dynamo"
 	"github.com/pkg/errors"
 )
 
@@ -47,6 +48,23 @@ func (se *Service) CardTopup(id string, amt float64) (*model.CardStatus, error) 
 
 	if err := se.db.CardsTable().Update("id", id).If("attribute_exists(id)").Add("balance", amt).Value(&cs); err != nil {
 		return nil, errors.Wrap(err, "updateCard")
+	}
+
+	return &cs, nil
+}
+
+// CardStatement returns a card statement.
+func (se *Service) CardStatement(id string) (*model.CardStatement, error) {
+	var cs model.CardStatement
+
+	s, err := se.CardStatus(id)
+	if err != nil {
+		return nil, errors.Wrap(err, "cardStatus")
+	}
+	cs.Status = *s
+
+	if err := se.db.TxTable().Get("card_id", id).Index("card_id-index").All(&cs.Transactions); err != nil && err != dynamo.ErrNotFound {
+		return nil, errors.Wrap(err, "getTx")
 	}
 
 	return &cs, nil

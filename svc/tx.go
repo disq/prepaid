@@ -20,11 +20,16 @@ func (se *Service) NewTx(cardID string, amt float64, merchant string) (*model.Tx
 		return nil, fmt.Errorf("amt should be positive")
 	}
 
+	t := time.Now().UTC()
+
 	ts := model.TxStatus{
-		ID:      prepaid.UUID(),
-		CardID:  cardID,
-		Blocked: amt,
-		Expires: time.Now().UTC().Add(TxExpireDuration),
+		ID:       prepaid.UUID(),
+		CardID:   cardID,
+		Merchant: merchant,
+
+		Blocked:   amt,
+		CreatedAt: model.NullTime{Valid: true, Time: t},
+		ExpiresAt: model.NullTime{Valid: true, Time: t.Add(TxExpireDuration)},
 	}
 
 	// Allocate amt in cardsTable
@@ -84,11 +89,13 @@ func (se *Service) TxCapture(id string, amt float64) (*model.TxStatus, error) {
 		return nil, fmt.Errorf("amt should be positive")
 	}
 
-	if err := se.db.TxTable().Update("id", id).If("attribute_exists(id) AND blocked >= ?", amt).Add("blocked", -amt).Add("captured", amt).Value(&ts); err != nil {
+	t := model.NullTime{Valid: true, Time: time.Now().UTC()}
+
+	if err := se.db.TxTable().Update("id", id).If("attribute_exists(id) AND blocked >= ?", amt).Add("blocked", -amt).Add("captured", amt).Set("captured_at", t).Value(&ts); err != nil {
 		return nil, errors.Wrap(err, "updateTx")
 	}
 
-	if err := se.db.CardsTable().Update("id", ts.CardID).If("attribute_exists(id) AND blocked >= ?", amt).Add("blocked", -amt).Add("balance", -amt).Run(); err != nil {
+	if err := se.db.CardsTable().Update("id", ts.CardID).If("attribute_exists(id) AND blocked >= ?", amt).Add("blocked", -amt).Run(); err != nil {
 		// FIXME rollback txTable
 		se.logger.Printf("WARNING(TxCapture) Orphan txTable: id=%v amt=%v", id, amt)
 		return nil, errors.Wrap(err, "updateBalance")
@@ -105,11 +112,13 @@ func (se *Service) TxRefund(id string, amt float64) (*model.TxStatus, error) {
 		return nil, fmt.Errorf("amt should be positive")
 	}
 
-	if err := se.db.TxTable().Update("id", id).If("attribute_exists(id) AND blocked = ? AND captured >= ?", 0, amt).Add("captured", -amt).Add("refunded", amt).Value(&ts); err != nil {
+	t := model.NullTime{Valid: true, Time: time.Now().UTC()}
+
+	if err := se.db.TxTable().Update("id", id).If("attribute_exists(id) AND blocked = ? AND captured >= ?", 0, amt).Add("captured", -amt).Add("refunded", amt).Set("refunded_at", t).Value(&ts); err != nil {
 		return nil, errors.Wrap(err, "updateTx")
 	}
 
-	if err := se.db.CardsTable().Update("id", ts.CardID).If("attribute_exists(id) AND blocked >= ?", amt).Add("blocked", -amt).Add("balance", amt).Run(); err != nil {
+	if err := se.db.CardsTable().Update("id", ts.CardID).If("attribute_exists(id) AND blocked >= ?", amt).Add("balance", amt).Run(); err != nil {
 		// FIXME rollback txTable
 		se.logger.Printf("WARNING(TxRefund) Orphan txTable: id=%v amt=%v", id, amt)
 		return nil, errors.Wrap(err, "updateBalance")
