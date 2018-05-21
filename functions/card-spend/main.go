@@ -32,6 +32,11 @@ func main() {
 }
 
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	id := strings.TrimSpace(request.PathParameters["id"])
+	if id == "" {
+		return se.ApiGW(nil, fmt.Errorf("Invalid id"))
+	}
+
 	amt := float64(0)
 
 	if amtStr := strings.TrimSpace(request.QueryStringParameters["amt"]); amtStr != "" {
@@ -40,7 +45,14 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			return se.ApiGW(nil, fmt.Errorf("Invalid amt"))
 		}
 		amt = res
+	} else {
+		return se.ApiGW(nil, fmt.Errorf("Invalid amt"))
 	}
 
-	return se.ApiGW(se.NewCard(amt))
+	merchant := strings.TrimSpace(request.QueryStringParameters["merchant"])
+	if merchant == "" {
+		return se.ApiGW(nil, fmt.Errorf("Invalid merchant"))
+	}
+
+	return se.ApiGW(se.NewTx(id, amt, merchant))
 }

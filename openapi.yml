@@ -85,6 +85,93 @@ paths:
                   $ref: '#/components/schemas/CardStatus'
         '500':
           description: Invalid input
+  /card/{id}/spend:
+    post:
+      tags:
+        - cards
+        - transactions
+      summary: Authorization request to spend money oncard
+      operationId: card-spend
+      parameters:
+        - name: id
+          in: path
+          description: Card ID
+          required: true
+          schema:
+            type: string
+        - name: amt
+          in: query
+          description: Amount to authorize to spend
+          required: true
+          schema:
+            type: number
+            format: float
+        - name: merchant
+          in: query
+          description: Name of merchant
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/TxStatus'
+        '500':
+          description: Invalid input
+  /tx/{id}/status:
+    post:
+      tags:
+        - transactions
+      summary: Get status of a transaction
+      operationId: tx-status
+      parameters:
+        - name: id
+          in: path
+          description: Transaction ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/TxStatus'
+        '500':
+          description: Invalid input
+  /tx/{id}/reverse:
+    post:
+      tags:
+        - transactions
+      summary: Reverse part of transaction for amount
+      operationId: tx-reverse
+      parameters:
+        - name: id
+          in: path
+          description: Transaction ID
+          required: true
+          schema:
+            type: string
+        - name: amt
+          in: query
+          description: Amount to reverse
+          required: true
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/TxStatus'
+        '500':
+          description: Invalid input
 components:
   schemas:
     CardStatus:
@@ -92,12 +179,28 @@ components:
       properties:
         id:
           type: string
-        available-balance:
+        balance:
           type: number
           format: float
-        blocked-amount:
+        blocked:
           type: number
           format: float
+    TxStatus:
+      type: object
+      properties:
+        id:
+          type: string
+        blocked:
+          type: number
+          format: float
+        captured:
+          type: number
+          format: float
+        refunded:
+          type: number
+          format: float
+        expires:
+          type: string
     ApiResponse:
       type: object
       properties:

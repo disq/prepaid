@@ -1,15 +1,21 @@
 package svc
 
 import (
+	"fmt"
+
 	"github.com/disq/prepaid"
 	"github.com/disq/prepaid/model"
 	"github.com/pkg/errors"
 )
 
 func (se *Service) NewCard(initialAmount float64) (*model.CardStatus, error) {
+	if !IsPositive(initialAmount) {
+		return nil, fmt.Errorf("initialAmount should be positive")
+	}
+
 	cs := model.CardStatus{
-		ID:               prepaid.UUID(),
-		AvailableBalance: initialAmount,
+		ID:      prepaid.UUID(),
+		Balance: initialAmount,
 	}
 
 	if err := se.db.CardsTable().Put(cs).Run(); err != nil {
@@ -30,6 +36,10 @@ func (se *Service) CardStatus(id string) (*model.CardStatus, error) {
 }
 
 func (se *Service) CardTopup(id string, amt float64) (*model.CardStatus, error) {
+	if !IsPositive(amt) {
+		return nil, fmt.Errorf("amt should be positive")
+	}
+
 	var cs model.CardStatus
 
 	if err := se.db.CardsTable().Update("id", id).If("attribute_exists(id)").Add("balance", amt).Value(&cs); err != nil {

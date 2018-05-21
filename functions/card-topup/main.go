@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -42,7 +41,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	if amtStr := strings.TrimSpace(request.QueryStringParameters["amt"]); amtStr != "" {
 		res, err := strconv.ParseFloat(amtStr, 64)
-		if err != nil || res <= 0 || math.IsNaN(res) || math.IsInf(res, 0) {
+		if err != nil {
 			return se.ApiGW(nil, fmt.Errorf("Invalid amt"))
 		}
 		amt = res

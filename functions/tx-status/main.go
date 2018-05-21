@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -32,15 +31,11 @@ func main() {
 }
 
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	amt := float64(0)
+	id := strings.TrimSpace(request.PathParameters["id"])
 
-	if amtStr := strings.TrimSpace(request.QueryStringParameters["amt"]); amtStr != "" {
-		res, err := strconv.ParseFloat(amtStr, 64)
-		if err != nil {
-			return se.ApiGW(nil, fmt.Errorf("Invalid amt"))
-		}
-		amt = res
+	if id == "" {
+		return se.ApiGW(nil, fmt.Errorf("Invalid id"))
 	}
 
-	return se.ApiGW(se.NewCard(amt))
+	return se.ApiGW(se.TxStatus(id))
 }

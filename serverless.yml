@@ -82,7 +82,7 @@ functions:
               paths:
                 id: true
               querystrings:
-                merchant_name: true
+                merchant: true
                 amt: true
 
   tx-status:

@@ -1,7 +1,7 @@
 package model
 
 type CardStatus struct {
-	ID               string  `json:"id" dynamo:"id"`
-	AvailableBalance float64 `json:"available-balance" dynamo:"balance"`
-	BlockedAmount    float64 `json:"blocked-amount" dynamo:"blocked,omitempty"`
+	ID      string  `json:"id" dynamo:"id"`
+	Balance float64 `json:"balance" dynamo:"balance"`
+	Blocked float64 `json:"amount" dynamo:"blocked,omitempty"`
 }
