@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Service is our main prepaid card service.
 type Service struct {
 	ctx    context.Context
 	logger *log.Logger
@@ -17,6 +18,7 @@ type Service struct {
 	db  *db.DB
 }
 
+// New creates a new Service.
 func New(ctx context.Context, logger *log.Logger) (*Service, error) {
 	a, err := aws.New()
 	if err != nil {

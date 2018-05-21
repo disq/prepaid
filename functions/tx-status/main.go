@@ -30,6 +30,7 @@ func main() {
 	lambda.Start(Handler)
 }
 
+// Handler is the Lambda entrypoint.
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	id := strings.TrimSpace(request.PathParameters["id"])
 

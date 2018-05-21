@@ -10,9 +10,11 @@ import (
 )
 
 const (
+	// TxExpireDuration is the time uncaptured transactions expire.
 	TxExpireDuration = 12 * time.Hour
 )
 
+// NewTx creates a new transaction on card cardID, blocking amt funds for merchant.
 func (se *Service) NewTx(cardID string, amt float64, merchant string) (*model.TxStatus, error) {
 	if !IsPositive(amt) {
 		return nil, fmt.Errorf("amt should be positive")
@@ -42,6 +44,7 @@ func (se *Service) NewTx(cardID string, amt float64, merchant string) (*model.Tx
 	return &ts, nil
 }
 
+// TxStatus returns info about a transaction.
 func (se *Service) TxStatus(id string) (*model.TxStatus, error) {
 	var ts model.TxStatus
 
@@ -52,6 +55,7 @@ func (se *Service) TxStatus(id string) (*model.TxStatus, error) {
 	return &ts, nil
 }
 
+// TxReverse reverses part of a transaction, unblocking amt funds.
 func (se *Service) TxReverse(id string, amt float64) (*model.TxStatus, error) {
 	var ts model.TxStatus
 
@@ -72,6 +76,7 @@ func (se *Service) TxReverse(id string, amt float64) (*model.TxStatus, error) {
 	return &ts, nil
 }
 
+// TxCapture captures part of a transaction, spending amt funds from card.
 func (se *Service) TxCapture(id string, amt float64) (*model.TxStatus, error) {
 	var ts model.TxStatus
 
@@ -92,6 +97,7 @@ func (se *Service) TxCapture(id string, amt float64) (*model.TxStatus, error) {
 	return &ts, nil
 }
 
+// TxRefund refunds part of a fully-captured transaction, refunding amt funds to card.
 func (se *Service) TxRefund(id string, amt float64) (*model.TxStatus, error) {
 	var ts model.TxStatus
 

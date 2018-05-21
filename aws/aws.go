@@ -5,10 +5,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 )
 
+// AWS is our helper type for aws-related operations.
 type AWS struct {
 	Ses *session.Session
 }
 
+// New creates a new AWS instance.
 func New() (*AWS, error) {
 	ses, err := NewSession(0, "")
 	if err != nil {
@@ -20,6 +22,7 @@ func New() (*AWS, error) {
 	}, nil
 }
 
+// NewSession creates a new aws session.
 func NewSession(maxRetries int, region string) (*session.Session, error) {
 	awsCfg := aw.NewConfig().WithMaxRetries(maxRetries) //.WithLogLevel(aws.LogDebug))
 	if region != "" {

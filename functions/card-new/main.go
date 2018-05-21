@@ -31,6 +31,7 @@ func main() {
 	lambda.Start(Handler)
 }
 
+// Handler is the Lambda entrypoint.
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	amt := float64(0)
 

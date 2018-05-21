@@ -2,6 +2,7 @@ package model
 
 import "time"
 
+// TxStatus contains info about a transaction.
 type TxStatus struct {
 	ID       string    `json:"id" dynamo:"id"`
 	CardID   string    `json:"-" dynamo:"card_id"`

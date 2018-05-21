@@ -10,6 +10,7 @@ import (
 	"github.com/guregu/dynamo"
 )
 
+// DB is our database helper type.
 type DB struct {
 	*dynamo.DB
 
@@ -21,10 +22,12 @@ type DB struct {
 }
 
 const (
+	// These environment variables are the table names in DynamoDB.
 	envCardsTable = "CARDS_TABLE"
 	envTxTable    = "TX_TABLE"
 )
 
+// New creates a new DB instance.
 func New(aw *aws.AWS, logger *log.Logger) (*DB, error) {
 	ct := strings.TrimSpace(os.Getenv(envCardsTable))
 	if ct == "" {
@@ -46,10 +49,12 @@ func New(aw *aws.AWS, logger *log.Logger) (*DB, error) {
 	}, nil
 }
 
+// CardsTable returns the cards table ready to be used by guregu/dynamo.
 func (d *DB) CardsTable() dynamo.Table {
 	return d.DB.Table(d.cardsTable)
 }
 
+// TxTable returns the transactions table ready to be used by guregu/dynamo.
 func (d *DB) TxTable() dynamo.Table {
 	return d.DB.Table(d.txTable)
 }

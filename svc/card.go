@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// NewCard creates a new card, loaded with initialAmount of funds.
 func (se *Service) NewCard(initialAmount float64) (*model.CardStatus, error) {
 	if !IsPositive(initialAmount) {
 		return nil, fmt.Errorf("initialAmount should be positive")
@@ -25,6 +26,7 @@ func (se *Service) NewCard(initialAmount float64) (*model.CardStatus, error) {
 	return &cs, nil
 }
 
+// CardStatus returns info about a card.
 func (se *Service) CardStatus(id string) (*model.CardStatus, error) {
 	var cs model.CardStatus
 
@@ -35,6 +37,7 @@ func (se *Service) CardStatus(id string) (*model.CardStatus, error) {
 	return &cs, nil
 }
 
+// CardTopup tops up a card with amt funds.
 func (se *Service) CardTopup(id string, amt float64) (*model.CardStatus, error) {
 	if !IsPositive(amt) {
 		return nil, fmt.Errorf("amt should be positive")
