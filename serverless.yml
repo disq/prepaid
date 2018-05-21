@@ -8,6 +8,10 @@ provider:
     CARDS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-cards
     TX_TABLE: ${self:service}-${opt:stage, self:provider.stage}-tx
 
+  apiKeys:
+    - devel
+    - tryout
+
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -37,6 +41,7 @@ functions:
           method: post
           cors: true
           resp: http
+          private: true
           request:
             parameters:
               querystrings:
@@ -50,6 +55,7 @@ functions:
           method: get
           cors: true
           resp: http
+          private: true
           request:
             parameters:
               paths:
@@ -63,6 +69,7 @@ functions:
           method: post
           cors: true
           resp: http
+          private: true
           request:
             parameters:
               paths:
@@ -78,6 +85,7 @@ functions:
           method: post
           cors: true
           resp: http
+          private: true
           request:
             parameters:
               paths:
@@ -94,6 +102,7 @@ functions:
           method: get
           cors: true
           resp: http
+          private: true
           request:
             parameters:
               paths:
@@ -107,6 +116,7 @@ functions:
           method: get
           cors: true
           resp: http
+          private: true
           request:
             parameters:
               paths:
@@ -120,6 +130,7 @@ functions:
           method: post
           cors: true
           resp: http
+          private: true
           request:
             parameters:
               paths:
@@ -135,6 +146,7 @@ functions:
           method: post
           cors: true
           resp: http
+          private: true
           request:
             parameters:
               paths:
@@ -150,6 +162,7 @@ functions:
           method: post
           cors: true
           resp: http
+          private: true
           request:
             parameters:
               paths:
