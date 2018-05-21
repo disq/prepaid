@@ -172,6 +172,64 @@ paths:
                   $ref: '#/components/schemas/TxStatus'
         '500':
           description: Invalid input
+  /tx/{id}/capture:
+    post:
+      tags:
+        - transactions
+      summary: Capture part of transaction for amount
+      operationId: tx-capture
+      parameters:
+        - name: id
+          in: path
+          description: Transaction ID
+          required: true
+          schema:
+            type: string
+        - name: amt
+          in: query
+          description: Amount to capture
+          required: true
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/TxStatus'
+        '500':
+          description: Invalid input
+  /tx/{id}/refund:
+    post:
+      tags:
+        - transactions
+      summary: Refund part of transaction for amount
+      operationId: tx-refund
+      parameters:
+        - name: id
+          in: path
+          description: Transaction ID
+          required: true
+          schema:
+            type: string
+        - name: amt
+          in: query
+          description: Amount to refund
+          required: true
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/TxStatus'
+        '500':
+          description: Invalid input
 components:
   schemas:
     CardStatus:

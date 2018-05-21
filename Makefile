@@ -25,6 +25,8 @@ sls-build:
 	env GOOS=linux go build -ldflags="-s -w" -o bin/card-spend functions/card-spend/*.go
 	env GOOS=linux go build -ldflags="-s -w" -o bin/tx-status functions/tx-status/*.go
 	env GOOS=linux go build -ldflags="-s -w" -o bin/tx-reverse functions/tx-reverse/*.go
+	env GOOS=linux go build -ldflags="-s -w" -o bin/tx-capture functions/tx-capture/*.go
+	env GOOS=linux go build -ldflags="-s -w" -o bin/tx-refund functions/tx-refund/*.go
 
 sls-deploy:
 	serverless deploy

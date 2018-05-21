@@ -71,3 +71,43 @@ func (se *Service) TxReverse(id string, amt float64) (*model.TxStatus, error) {
 
 	return &ts, nil
 }
+
+func (se *Service) TxCapture(id string, amt float64) (*model.TxStatus, error) {
+	var ts model.TxStatus
+
+	if !IsPositive(amt) {
+		return nil, fmt.Errorf("amt should be positive")
+	}
+
+	if err := se.db.TxTable().Update("id", id).If("attribute_exists(id) AND blocked >= ?", amt).Add("blocked", -amt).Add("captured", amt).Value(&ts); err != nil {
+		return nil, errors.Wrap(err, "updateTx")
+	}
+
+	if err := se.db.CardsTable().Update("id", ts.CardID).If("attribute_exists(id) AND blocked >= ?", amt).Add("blocked", -amt).Add("balance", -amt).Run(); err != nil {
+		// FIXME rollback txTable
+		se.logger.Printf("WARNING(TxCapture) Orphan txTable: id=%v amt=%v", id, amt)
+		return nil, errors.Wrap(err, "updateBalance")
+	}
+
+	return &ts, nil
+}
+
+func (se *Service) TxRefund(id string, amt float64) (*model.TxStatus, error) {
+	var ts model.TxStatus
+
+	if !IsPositive(amt) {
+		return nil, fmt.Errorf("amt should be positive")
+	}
+
+	if err := se.db.TxTable().Update("id", id).If("attribute_exists(id) AND blocked = ? AND captured >= ?", 0, amt).Add("captured", -amt).Add("refunded", amt).Value(&ts); err != nil {
+		return nil, errors.Wrap(err, "updateTx")
+	}
+
+	if err := se.db.CardsTable().Update("id", ts.CardID).If("attribute_exists(id) AND blocked >= ?", amt).Add("blocked", -amt).Add("balance", amt).Run(); err != nil {
+		// FIXME rollback txTable
+		se.logger.Printf("WARNING(TxRefund) Orphan txTable: id=%v amt=%v", id, amt)
+		return nil, errors.Wrap(err, "updateBalance")
+	}
+
+	return &ts, nil
+}
